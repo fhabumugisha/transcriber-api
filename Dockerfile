@@ -28,4 +28,4 @@ HEALTHCHECK --interval=30s --timeout=60s --start-period=120s --retries=3 \
 EXPOSE 8080
 
 # Run with higher timeouts and single worker for stability
-CMD ["gunicorn", "app:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8080", "--timeout", "900", "--keep-alive", "120", "--log-level", "debug"] 
+CMD ["gunicorn", "app:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8080", "--timeout", "1800", "--keep-alive", "240", "--log-level", "debug"] 
