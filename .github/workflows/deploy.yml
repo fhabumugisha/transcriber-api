@@ -1,0 +1,51 @@
+name: Deploy transcriber-api to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGION: europe-west1
+  SERVICE_NAME: transcriber-api
+  IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/transcriber-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Authorize Docker push to Google Container Registry
+        run: gcloud auth configure-docker
+
+      - name: Build & Push Image
+        run: |
+          gcloud builds submit --tag $IMAGE
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE_NAME \
+            --image $IMAGE \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 4Gi \
+            --cpu 2 \
+            --timeout 900 \
+            --concurrency 1
+
+      - name: Show service URL
+        run: |
+          echo "Deployed service URL: $(gcloud run services describe $SERVICE_NAME --region $REGION --format 'value(status.url)')" 
