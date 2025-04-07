@@ -66,8 +66,12 @@ async def transcribe_audio(
             # For large models, we might need to use a lower precision
             compute_type = "int8_float16"
             
+        # Use environment variable for download root or fallback to /app/models
+        download_root = os.environ.get("WHISPER_DOWNLOAD_ROOT", "/app/models")
+        logger.info(f"Using model download root: {download_root}")
+        
         whisper_model = WhisperModel(model, device="cpu", compute_type=compute_type, 
-                                     local_files_only=False, download_root=None)
+                                     local_files_only=True, download_root=download_root)
         
         logger.info("Starting transcription")
         segments, info = whisper_model.transcribe(audio_path, language=language, 
